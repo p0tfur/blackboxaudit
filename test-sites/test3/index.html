@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Site 3 - Mixed Content Detection</title>
+    <!-- Mieszana zawartość HTTP/HTTPS -->
+    <script src="https://example.com/secure-script.js"></script>
+    <script src="http://example.com/insecure-script.js"></script>
+    <link rel="stylesheet" href="https://example.com/secure-style.css">
+    <link rel="stylesheet" href="http://example.com/insecure-style.css">
+</head>
+<body>
+    <h1>Test Site 3 - Mixed Content Detection</h1>
+    <p>Ta strona celowo zawiera mieszaną zawartość HTTP/HTTPS:</p>
+    <ul>
+        <li>Bezpieczne zasoby (HTTPS):
+            <ul>
+                <li>Skrypt JavaScript (https://example.com/secure-script.js)</li>
+                <li>Arkusz stylów CSS (https://example.com/secure-style.css)</li>
+                <li><img src="https://example.com/secure-image.jpg" alt="Bezpieczny obraz" width="200"></li>
+            </ul>
+        </li>
+        <li>Niebezpieczne zasoby (HTTP):
+            <ul>
+                <li>Skrypt JavaScript (http://example.com/insecure-script.js)</li>
+                <li>Arkusz stylów CSS (http://example.com/insecure-style.css)</li>
+                <li><img src="http://example.com/insecure-image.jpg" alt="Niebezpieczny obraz" width="200"></li>
+            </ul>
+        </li>
+    </ul>
+    <p>Dodatkowo, strona zawiera iframe z niezabezpieczoną zawartością:</p>
+    <iframe src="http://example.com/iframe-content" width="400" height="200" title="Niezabezpieczony iframe"></iframe>
+    
+    <h2>Oczekiwane wyniki skanowania:</h2>
+    <ul>
+        <li>Wykrycie mieszanej zawartości (mixed content)</li>
+        <li>Identyfikacja niezabezpieczonych zasobów</li>
+        <li>Ostrzeżenia dotyczące iframe z niezabezpieczoną zawartością</li>
+    </ul>
+</body>
+</html>

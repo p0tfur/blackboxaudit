@@ -1,0 +1,14 @@
+// https://nuxt.com/docs/api/configuration/nuxt-config
+export default defineNuxtConfig({
+  compatibilityDate: '2024-11-01',
+  devtools: { enabled: true },
+  modules: [
+    '@pinia/nuxt',
+    '@nuxtjs/tailwindcss',
+    'reka-ui/nuxt'
+  ],
+  pinia: {},
+  build: {
+    transpile: ['vue-chartjs', 'chart.js']
+  }
+})
