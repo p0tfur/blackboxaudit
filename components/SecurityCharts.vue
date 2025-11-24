@@ -1,7 +1,7 @@
 <template>
   <div class="bg-white rounded-lg shadow-md p-6 mb-6">
     <h2 class="text-xl font-bold mb-4">Security Analysis</h2>
-    
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
         <h3 class="text-lg mb-2">Issues by Category</h3>
@@ -20,85 +20,96 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useScanStore } from '../stores/scan'
-import { Pie as PieChart, Doughnut as DoughnutChart } from 'vue-chartjs'
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, type ChartOptions } from 'chart.js'
+import { defineComponent, computed } from "vue";
+import { storeToRefs } from "pinia";
+import { useScanStore } from "../stores/scan";
+import { Pie as PieChart, Doughnut as DoughnutChart } from "vue-chartjs";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, type ChartOptions } from "chart.js";
 
-ChartJS.register(ArcElement, Tooltip, Legend)
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default defineComponent({
-  name: 'SecurityCharts',
+  name: "SecurityCharts",
   components: {
     PieChart,
-    DoughnutChart
+    DoughnutChart,
   },
   setup() {
-    const store = useScanStore()
-    const { results } = storeToRefs(store)
+    const store = useScanStore();
+    const { results } = storeToRefs(store);
 
     // Chart options
-    const chartOptions = computed<ChartOptions<'pie' | 'doughnut'>>(() => ({
+    const chartOptions = computed<ChartOptions<"pie" | "doughnut">>(() => ({
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: {
-          position: 'bottom'
-        }
-      }
-    }))
+          position: "bottom",
+        },
+      },
+    }));
 
     // Categories chart data
     const categoryChartData = computed(() => {
-      const categories: Record<string, number> = {
-        'Headers': 0,
-        'Transport': 0,
-        'Content': 0,
-        'Forms': 0,
-        'Other': 0
-      }
-      
-      results.value.forEach(issue => {
-        // Simple categorization based on issue name
-        if (issue.name.toLowerCase().includes('header')) categories['Headers']++
-        else if (issue.name.toLowerCase().includes('https') || issue.name.toLowerCase().includes('transport')) categories['Transport']++
-        else if (issue.name.toLowerCase().includes('form')) categories['Forms']++
-        else if (issue.name.toLowerCase().includes('javascript') || issue.name.toLowerCase().includes('content')) categories['Content']++
-        else categories['Other']++
-      })
-      
+      const defaultCategories = [
+        "transport",
+        "headers",
+        "content",
+        "forms",
+        "cookies",
+        "information",
+        "third-party",
+        "other",
+      ];
+      const counts: Record<string, number> = {};
+
+      defaultCategories.forEach((category) => {
+        counts[category] = 0;
+      });
+
+      results.value.forEach((issue) => {
+        const category = issue.category ?? "other";
+        counts[category] = (counts[category] ?? 0) + 1;
+      });
+
+      const labels = Object.keys(counts);
+      const data = labels.map((label) => counts[label]);
+
       return {
-        labels: Object.keys(categories),
-        datasets: [{
-          backgroundColor: ['#4B5563', '#3B82F6', '#10B981', '#F59E0B', '#6366F1'],
-          data: Object.values(categories)
-        }]
-      }
-    })
+        labels,
+        datasets: [
+          {
+            backgroundColor: ["#3B82F6", "#6366F1", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#4B5563"],
+            data,
+          },
+        ],
+      };
+    });
 
     // Severity chart data
     const severityChartData = computed(() => {
       const severityCounts = {
-        'High': results.value.filter(i => i.severity === 'high').length,
-        'Medium': results.value.filter(i => i.severity === 'medium').length,
-        'Low': results.value.filter(i => i.severity === 'low').length
-      }
-      
+        High: results.value.filter((i) => i.severity === "high").length,
+        Medium: results.value.filter((i) => i.severity === "medium").length,
+        Low: results.value.filter((i) => i.severity === "low").length,
+      };
+
       return {
         labels: Object.keys(severityCounts),
-        datasets: [{
-          backgroundColor: ['#EF4444', '#F59E0B', '#3B82F6'],
-          data: Object.values(severityCounts)
-        }]
-      }
-    })
+        datasets: [
+          {
+            backgroundColor: ["#EF4444", "#F59E0B", "#3B82F6"],
+            data: Object.values(severityCounts),
+          },
+        ],
+      };
+    });
 
     return {
       chartOptions,
       categoryChartData,
-      severityChartData
-    }
-  }
-})
+      severityChartData,
+    };
+  },
+});
 </script>
