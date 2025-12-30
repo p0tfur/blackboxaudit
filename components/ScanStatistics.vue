@@ -1,84 +1,107 @@
 <template>
-  <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-    <h2 class="text-xl font-bold mb-4">Scan Statistics</h2>
-
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+  <div class="space-y-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <!-- Total Issues Card -->
-      <div class="bg-gray-50 rounded-lg p-4 text-center">
-        <span class="text-sm font-medium text-gray-600 block">Total Issues</span>
-        <span class="text-2xl font-bold text-gray-800 mt-1 block">{{ totalIssues }}</span>
+      <div
+        class="bg-slate-50 rounded-xl p-4 text-center border border-slate-100 flex flex-col justify-center min-h-[120px]"
+      >
+        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 block mb-2">Total Issues</span>
+        <span class="text-3xl font-display font-bold text-slate-800">{{ totalIssues }}</span>
       </div>
 
       <!-- Security Score Card -->
-      <div class="bg-gray-50 rounded-lg p-4 text-center">
-        <span class="text-sm font-medium text-gray-600 block">Security Score</span>
-        <span class="text-2xl font-bold mt-1 block" :class="scoreColorClass">{{ score }}/100</span>
+      <div
+        class="bg-slate-50 rounded-xl p-4 text-center border border-slate-100 flex flex-col justify-center min-h-[120px]"
+      >
+        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 block mb-2">Security Score</span>
+        <span class="text-3xl font-display font-bold flex justify-center items-baseline" :class="scoreColorClass">
+          {{ score }}<span class="text-lg text-slate-400 font-normal ml-0.5">/100</span>
+        </span>
       </div>
 
       <!-- Scan Time Card -->
-      <div class="bg-gray-50 rounded-lg p-4 text-center">
-        <span class="text-sm font-medium text-gray-600 block">Scan Date</span>
-        <span class="text-lg font-medium text-gray-800 mt-1 block">{{ formattedScanDate }}</span>
+      <div
+        class="bg-slate-50 rounded-xl p-4 text-center border border-slate-100 flex flex-col justify-center min-h-[120px]"
+      >
+        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 block mb-2">Scan Date</span>
+        <span class="text-sm font-medium text-slate-700 leading-tight">{{ formattedScanDate }}</span>
       </div>
 
       <!-- URL Card -->
-      <div class="bg-gray-50 rounded-lg p-4 text-center overflow-hidden">
-        <span class="text-sm font-medium text-gray-600 block">URL</span>
-        <span class="text-lg font-medium text-gray-800 mt-1 block truncate" :title="url">{{ url }}</span>
+      <div
+        class="bg-slate-50 rounded-xl p-4 text-center border border-slate-100 flex flex-col justify-center min-h-[120px] relative group px-2"
+      >
+        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 block mb-2">Target URL</span>
+        <a
+          :href="url"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-sm font-medium text-brand-600 hover:text-brand-700 hover:underline block break-all leading-tight"
+          :title="url"
+        >
+          {{ url }}
+        </a>
       </div>
     </div>
 
     <!-- Severity Breakdown -->
-    <div class="mb-6">
-      <h3 class="text-lg font-medium mb-3">Severity Breakdown</h3>
-      <div class="grid grid-cols-3 gap-4">
-        <div class="bg-red-50 border border-red-100 rounded-lg p-3">
-          <div class="flex justify-between items-center">
-            <span class="font-medium text-red-800">High</span>
-            <span class="text-xl font-bold text-red-600">{{ highSeverityCount }}</span>
+    <div class="pt-2">
+      <h4 class="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wide">Severity Breakdown</h4>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white border border-red-100 rounded-xl p-4 shadow-sm">
+          <div class="flex justify-between items-end mb-2">
+            <span class="font-medium text-red-700 text-sm">High</span>
+            <span class="text-2xl font-bold text-red-600 leading-none">{{ highSeverityCount }}</span>
           </div>
-          <div class="mt-1 h-2 bg-red-200 rounded-full overflow-hidden">
-            <div class="h-full bg-red-600 rounded-full" :style="{ width: highSeverityPercentage + '%' }"></div>
-          </div>
-        </div>
-
-        <div class="bg-yellow-50 border border-yellow-100 rounded-lg p-3">
-          <div class="flex justify-between items-center">
-            <span class="font-medium text-yellow-800">Medium</span>
-            <span class="text-xl font-bold text-yellow-600">{{ mediumSeverityCount }}</span>
-          </div>
-          <div class="mt-1 h-2 bg-yellow-200 rounded-full overflow-hidden">
-            <div class="h-full bg-yellow-600 rounded-full" :style="{ width: mediumSeverityPercentage + '%' }"></div>
+          <div class="h-1.5 bg-red-100 rounded-full overflow-hidden">
+            <div
+              class="h-full bg-red-500 rounded-full transition-all duration-500"
+              :style="{ width: highSeverityPercentage + '%' }"
+            ></div>
           </div>
         </div>
 
-        <div class="bg-green-50 border border-green-100 rounded-lg p-3">
-          <div class="flex justify-between items-center">
-            <span class="font-medium text-green-800">Low</span>
-            <span class="text-xl font-bold text-green-600">{{ lowSeverityCount }}</span>
+        <div class="bg-white border border-amber-100 rounded-xl p-4 shadow-sm">
+          <div class="flex justify-between items-end mb-2">
+            <span class="font-medium text-amber-700 text-sm">Medium</span>
+            <span class="text-2xl font-bold text-amber-600 leading-none">{{ mediumSeverityCount }}</span>
           </div>
-          <div class="mt-1 h-2 bg-green-200 rounded-full overflow-hidden">
-            <div class="h-full bg-green-600 rounded-full" :style="{ width: lowSeverityPercentage + '%' }"></div>
+          <div class="h-1.5 bg-amber-100 rounded-full overflow-hidden">
+            <div
+              class="h-full bg-amber-500 rounded-full transition-all duration-500"
+              :style="{ width: mediumSeverityPercentage + '%' }"
+            ></div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-emerald-100 rounded-xl p-4 shadow-sm">
+          <div class="flex justify-between items-end mb-2">
+            <span class="font-medium text-emerald-700 text-sm">Low</span>
+            <span class="text-2xl font-bold text-emerald-600 leading-none">{{ lowSeverityCount }}</span>
+          </div>
+          <div class="h-1.5 bg-emerald-100 rounded-full overflow-hidden">
+            <div
+              class="h-full bg-emerald-500 rounded-full transition-all duration-500"
+              :style="{ width: lowSeverityPercentage + '%' }"
+            ></div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Performance Metrics -->
-    <div>
-      <h3 class="text-lg font-medium mb-3">Performance Metrics</h3>
-      <div class="grid grid-cols-2 gap-4">
-        <div class="bg-gray-50 rounded-lg p-4">
-          <div class="flex justify-between items-center">
-            <span class="font-medium text-gray-700">Scan Duration</span>
-            <span class="font-bold text-gray-800">{{ scanDuration }} sec</span>
-          </div>
+    <div class="pt-2">
+      <h4 class="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wide">Performance Metrics</h4>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="bg-slate-50 border border-slate-100 rounded-xl p-4 flex justify-between items-center">
+          <span class="text-sm font-medium text-slate-600">Scan Duration</span>
+          <span class="font-bold text-slate-900 font-mono bg-white px-2 py-1 rounded border border-slate-200 text-xs">{{
+            scanDuration
+          }}</span>
         </div>
-        <div class="bg-gray-50 rounded-lg p-4">
-          <div class="flex justify-between items-center">
-            <span class="font-medium text-gray-700">Issues per Category</span>
-            <span class="font-bold text-gray-800">{{ issuesPerCategory }}</span>
-          </div>
+        <div class="bg-slate-50 border border-slate-100 rounded-xl p-4">
+          <span class="text-xs font-semibold text-slate-500 uppercase block mb-2">Issues per Category</span>
+          <p class="text-xs text-slate-700 font-mono leading-relaxed">{{ issuesPerCategory }}</p>
         </div>
       </div>
     </div>

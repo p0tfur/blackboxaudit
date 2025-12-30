@@ -1,17 +1,15 @@
 <template>
-  <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-    <h2 class="text-xl font-bold mb-4">Security Analysis</h2>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <div class="space-y-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
       <div>
-        <h3 class="text-lg mb-2">Issues by Category</h3>
-        <div class="h-64">
+        <h4 class="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wide text-center">Issues by Category</h4>
+        <div class="h-64 relative">
           <PieChart :data="categoryChartData" :options="chartOptions" />
         </div>
       </div>
       <div>
-        <h3 class="text-lg mb-2">Severity Distribution</h3>
-        <div class="h-64">
+        <h4 class="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wide text-center">Severity Distribution</h4>
+        <div class="h-64 relative">
           <DoughnutChart :data="severityChartData" :options="chartOptions" />
         </div>
       </div>
@@ -79,8 +77,9 @@ export default defineComponent({
         labels,
         datasets: [
           {
-            backgroundColor: ["#3B82F6", "#6366F1", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#4B5563"],
+            backgroundColor: ["#2563eb", "#06b6d4", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#475569"],
             data,
+            borderWidth: 0,
           },
         ],
       };
@@ -98,8 +97,9 @@ export default defineComponent({
         labels: Object.keys(severityCounts),
         datasets: [
           {
-            backgroundColor: ["#EF4444", "#F59E0B", "#3B82F6"],
+            backgroundColor: ["#ef4444", "#f59e0b", "#10b981"],
             data: Object.values(severityCounts),
+            borderWidth: 0,
           },
         ],
       };
