@@ -31,17 +31,27 @@
                 >Security Tips</NuxtLink
               >
             </li>
-            <li><a href="#" class="text-slate-600 hover:text-brand-600 transition-colors">Documentation</a></li>
-            <li><a href="#" class="text-slate-600 hover:text-brand-600 transition-colors">API Reference</a></li>
+            <li>
+              <NuxtLink to="/documentation" class="text-slate-600 hover:text-brand-600 transition-colors"
+                >Documentation</NuxtLink
+              >
+            </li>
           </ul>
         </div>
 
         <div>
           <h5 class="font-bold text-slate-900 mb-4">Legal</h5>
           <ul class="space-y-2 text-sm">
-            <li><a href="#" class="text-slate-600 hover:text-brand-600 transition-colors">Privacy Policy</a></li>
-            <li><a href="#" class="text-slate-600 hover:text-brand-600 transition-colors">Terms of Service</a></li>
-            <li><a href="#" class="text-slate-600 hover:text-brand-600 transition-colors">Cookie Policy</a></li>
+            <li>
+              <NuxtLink to="/privacy-policy" class="text-slate-600 hover:text-brand-600 transition-colors"
+                >Privacy Policy</NuxtLink
+              >
+            </li>
+            <li>
+              <NuxtLink to="/terms-of-service" class="text-slate-600 hover:text-brand-600 transition-colors"
+                >Terms of Service</NuxtLink
+              >
+            </li>
           </ul>
         </div>
       </div>
