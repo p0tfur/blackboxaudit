@@ -3,16 +3,17 @@
 # Base image with pnpm enabled via Corepack
 FROM node:20-bookworm AS base
 WORKDIR /app
-ENV NODE_ENV=production
 RUN corepack enable
 
 # Install dependencies using pnpm (shared across build layers)
 FROM base AS deps
+ENV NODE_ENV=development
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
 # Build the Nuxt application
 FROM deps AS build
+ENV NODE_ENV=development
 COPY . .
 RUN pnpm run build
 
