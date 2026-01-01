@@ -124,7 +124,7 @@
               <li><strong>Deletion:</strong> Request deletion of your personal information</li>
               <li><strong>Objection:</strong> Object to processing of your information</li>
             </ul>
-            <p class="text-slate-600 mt-4">To exercise these rights, please contact us at privacy@blackboxaudit.com.</p>
+            <p class="text-slate-600 mt-4">To exercise these rights, please contact us at contact@blackboxaudit.com.</p>
           </section>
 
           <section class="mb-12">
@@ -175,9 +175,8 @@
             </p>
             <div class="bg-white rounded-lg border border-slate-200 p-6">
               <ul class="space-y-2 text-slate-600">
-                <li><strong>Email:</strong> privacy@blackboxaudit.com</li>
+                <li><strong>Email:</strong> contact@blackboxaudit.com</li>
                 <li><strong>Website:</strong> https://blackboxaudit.com</li>
-                <li><strong>Address:</strong> [Your Business Address]</li>
               </ul>
             </div>
           </section>
