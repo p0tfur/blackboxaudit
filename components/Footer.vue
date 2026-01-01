@@ -36,6 +36,14 @@
                 >Documentation</NuxtLink
               >
             </li>
+            <li>
+              <a
+                href="https://crosspostingpal.com/"
+                target="_blank"
+                class="text-slate-600 hover:text-brand-600 transition-colors"
+                >Social Media Scheduler</a
+              >
+            </li>
           </ul>
         </div>
 
