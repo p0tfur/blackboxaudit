@@ -30,45 +30,43 @@
               <div class="bg-white rounded-lg border border-slate-200 p-6">
                 <h3 class="text-lg font-semibold text-slate-900 mb-3">HTTP Headers</h3>
                 <ul class="space-y-2 text-slate-600">
-                  <li>• Content Security Policy (CSP)</li>
-                  <li>• X-Frame-Options</li>
-                  <li>• X-Content-Type-Options</li>
-                  <li>• Strict-Transport-Security</li>
-                  <li>• Referrer Policy</li>
-                  <li>• Permissions Policy</li>
+                  <li>• Content-Security-Policy (CSP) presence/strength</li>
+                  <li>• X-Frame-Options presence/strength</li>
+                  <li>• X-Content-Type-Options (nosniff)</li>
+                  <li>• Strict-Transport-Security (HSTS) presence/strength</li>
+                  <li>• Referrer-Policy recommendations</li>
+                  <li>• Permissions-Policy presence</li>
+                  <li>• CORS wildcard + credentials misconfiguration</li>
+                  <li>• COOP / COEP presence</li>
                 </ul>
               </div>
               <div class="bg-white rounded-lg border border-slate-200 p-6">
-                <h3 class="text-lg font-semibold text-slate-900 mb-3">SSL/TLS Analysis</h3>
+                <h3 class="text-lg font-semibold text-slate-900 mb-3">SSL/TLS Certificate</h3>
                 <ul class="space-y-2 text-slate-600">
-                  <li>• Certificate validity</li>
-                  <li>• Protocol versions</li>
-                  <li>• Cipher suites</li>
-                  <li>• Certificate chain</li>
-                  <li>• OCSP stapling</li>
-                  <li>• HSTS support</li>
+                  <li>• Certificate expiry date (alerts if &lt; 30 days)</li>
+                  <li>• Expired certificate detection</li>
+                  <li>• Issuer/Subject surfaced for review</li>
                 </ul>
               </div>
               <div class="bg-white rounded-lg border border-slate-200 p-6">
-                <h3 class="text-lg font-semibold text-slate-900 mb-3">Vulnerability Scanning</h3>
+                <h3 class="text-lg font-semibold text-slate-900 mb-3">Crawling &amp; Form Analysis</h3>
                 <ul class="space-y-2 text-slate-600">
-                  <li>• OWASP Top 10 checks</li>
-                  <li>• Common misconfigurations</li>
-                  <li>• Information disclosure</li>
-                  <li>• Cross-site scripting (XSS)</li>
-                  <li>• SQL injection indicators</li>
-                  <li>• Directory traversal</li>
+                  <li>• Shallow crawl (same-origin) to find up to a few subpages</li>
+                  <li>• POST forms missing CSRF tokens</li>
+                  <li>• Forms submitting to HTTP action URLs</li>
+                  <li>• Password fields missing recommended autocomplete values</li>
+                  <li>• Inline script detection (CSP hardening signal)</li>
                 </ul>
               </div>
               <div class="bg-white rounded-lg border border-slate-200 p-6">
-                <h3 class="text-lg font-semibold text-slate-900 mb-3">Performance & Best Practices</h3>
+                <h3 class="text-lg font-semibold text-slate-900 mb-3">Active Probing &amp; External Signals</h3>
                 <ul class="space-y-2 text-slate-600">
-                  <li>• Response time analysis</li>
-                  <li>• Compression detection</li>
-                  <li>• Cache headers</li>
-                  <li>• Resource optimization</li>
-                  <li>• CDN detection</li>
-                  <li>• Mobile optimization</li>
+                  <li>• Sensitive file probing (e.g. /.env, /.git/config, /web.config)</li>
+                  <li>• Soft 404 detection</li>
+                  <li>• robots.txt and security.txt discovery</li>
+                  <li>• Subresource Integrity (SRI) missing on external scripts</li>
+                  <li>• Third-party script domain inventory (supply chain risk signal)</li>
+                  <li>• DNS email security: SPF / DMARC presence (via DNS-over-HTTPS)</li>
                 </ul>
               </div>
             </div>
