@@ -18,7 +18,7 @@ export const useScanLimits = () => {
 
     const savedCount = window.localStorage.getItem("scan_count");
     if (savedCount) {
-      currentCount.value = parseInt(savedCount, 100);
+      currentCount.value = parseInt(savedCount, 10);
     }
   };
 

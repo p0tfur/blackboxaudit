@@ -120,8 +120,8 @@ const { data: cert, pending, error } = await useFetch(`/api/certificates/${route
 
 const scoreTextColor = computed(() => {
   const score = cert.value?.scan?.score || 0;
-  if (score >= 90) return 'text-emerald-600';
-  if (score >= 60) return 'text-amber-600';
+  if (score >= 70) return 'text-emerald-600';
+  if (score >= 40) return 'text-amber-600';
   return 'text-red-600';
 });
 

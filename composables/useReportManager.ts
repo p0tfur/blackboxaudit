@@ -168,10 +168,12 @@ export const useReportManager = () => {
     const saveAs = (fileSaverModule as any).saveAs ?? (fileSaverModule as any).default;
 
     // Format the report data with consistent structure
+    const scanDate = new Date(report.date);
     const formattedReport = {
       metadata: {
         url: report.url,
-        scanDate: new Date(report.date).toISOString(),
+        scanDate: scanDate.toLocaleString(),
+        scanDateISO: scanDate.toISOString(),
         securityScore: report.score,
         totalIssues: report.results.length,
         severitySummary: {

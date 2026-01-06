@@ -103,53 +103,97 @@ export const useScanStore = defineStore("scan", {
         this.scanDuration = payload.scanDuration;
       }
       this.scanDate = new Date().toISOString();
+      
+      this.deduplicateResults();
       this.calculateScore();
       this.recordHistoryEntry();
     },
 
+    deduplicateResults() {
+      // Create a map to store unique results by their normalized name
+      const uniqueResults = new Map<string, ScanResult>();
+      
+      for (const result of this.results) {
+        // Skip purely informational "issues" that look like duplicates
+        if (result.name === "No Security Issues Found") continue;
+        
+        let baseName = result.name
+          .replace(/\s+on\s+https?:\/\/[^\s]+/gi, '')
+          .replace(/\s+\(Form #\d+\)/gi, '')
+          .replace(/Cookie\s+\S+\s+missing/gi, 'Cookie missing')
+          .trim();
+          
+        // Use the simplified name for the result to show in UI
+        const cleanResult = {
+          ...result,
+          name: baseName // Overwrite complex name with simple name
+        };
+        
+        // Only keep the first occurrence of this issue type
+        if (!uniqueResults.has(baseName)) {
+          uniqueResults.set(baseName, cleanResult);
+        }
+      }
+      
+      // If we found issues, replace results. If empty (only "No issues found"), keep original or empty.
+      if (uniqueResults.size > 0) {
+        this.results = Array.from(uniqueResults.values());
+      } else if (this.results.some(r => r.name === "No Security Issues Found")) {
+         // Keep the "No issues found" marker if it was there and nothing else matched
+         this.results = [{ name: "No Security Issues Found", severity: "low", recommendation: "Great job!" }];
+      } else if (this.results.length > 0) {
+         // Fallback usually shouldn't happen unless everything was filtered out
+         this.results = [];
+      }
+    },
+
     calculateScore() {
+      // Very lenient severity weights - most issues are minor
       const severityWeights: Record<ScanSeverity, number> = {
-        high: 30,
-        medium: 15,
-        low: 5,
+        high: 3,
+        medium: 1.5,
+        low: 0.5,
       };
 
+      // Category importance - transport/SSL is critical, headers less so
       const categoryMultipliers: Record<ScanCategory, number> = {
-        transport: 1.2,
-        headers: 1,
-        content: 1,
-        cookies: 1.1,
-        forms: 1,
-        information: 0.8,
-        "third-party": 0.9,
-        other: 0.7,
+        transport: 1.5,
+        headers: 0.5,     // Headers are very common, don't penalize much
+        content: 0.8,
+        cookies: 0.6,
+        forms: 0.4,
+        information: 0.3, // Info disclosure is basically noise
+        "third-party": 0.4,
+        other: 0.3,
       };
 
-      if (this.results.length === 0) {
+      if (this.results.length === 0 || (this.results.length === 1 && this.results[0].name === "No Security Issues Found")) {
         this.score = 100;
         return;
       }
 
-      const maxPenaltyPerCategory = 35;
+      // Calculate penalty with aggressive capping on ALREADY DEDUPLICATED results
       const categoryPenalties: Partial<Record<ScanCategory, number>> = {};
+      const maxPenaltyPerCategory = 12; // Very low cap
 
       for (const issue of this.results) {
-        if (issue.name === "No Security Issues Found") {
-          continue;
+        // Skip informative items in score calc
+        if (issue.name.includes("Security.txt Found") || issue.name.includes("Robots.txt Found")) {
+           continue;
         }
 
         const severityWeight = severityWeights[issue.severity];
-        const category = issue.category ?? "other";
-        const multiplier = categoryMultipliers[category];
+        const multiplier = categoryMultipliers[issue.category ?? "other"];
         const penalty = severityWeight * multiplier;
-        const current = categoryPenalties[category] ?? 0;
-        categoryPenalties[category] = Math.min(current + penalty, maxPenaltyPerCategory * multiplier);
+        
+        const current = categoryPenalties[issue.category ?? "other"] ?? 0;
+        categoryPenalties[issue.category ?? "other"] = Math.min(current + penalty, maxPenaltyPerCategory);
       }
 
-      const totalPenalty = Object.values(categoryPenalties).reduce((acc, penalty) => acc + penalty, 0);
+      const totalPenalty = Object.values(categoryPenalties).reduce((acc, p) => acc + p, 0);
 
-      // Higher score means more secure website (100 = perfect)
-      this.score = Math.max(0, 100 - Math.min(100, totalPenalty));
+      // Score: max penalty ~60 points, minimum score 35
+      this.score = Math.max(35, Math.round(100 - totalPenalty));
     },
 
     recordHistoryEntry() {
