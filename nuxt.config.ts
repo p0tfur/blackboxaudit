@@ -22,4 +22,12 @@ export default defineNuxtConfig({
   build: {
     transpile: ["vue-chartjs", "chart.js"],
   },
+  nitro: {
+    serverAssets: [
+      {
+        baseName: 'migrations',
+        dir: './drizzle'
+      }
+    ]
+  }
 });

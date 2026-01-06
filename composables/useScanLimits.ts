@@ -7,7 +7,7 @@ interface ScanLimits {
 }
 
 export const useScanLimits = () => {
-  const maxScans = ref(10);
+  const maxScans = ref(100);
   const currentCount = ref(0);
 
   const hasWindow = typeof window !== "undefined";
@@ -18,7 +18,7 @@ export const useScanLimits = () => {
 
     const savedCount = window.localStorage.getItem("scan_count");
     if (savedCount) {
-      currentCount.value = parseInt(savedCount, 10);
+      currentCount.value = parseInt(savedCount, 100);
     }
   };
 

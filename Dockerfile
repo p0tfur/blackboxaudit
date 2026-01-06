@@ -26,6 +26,11 @@ ENV HOST=0.0.0.0
 
 # Copy compiled server output
 COPY --from=build /app/.output ./.output
+# Copy migration files
+COPY --from=build /app/drizzle ./drizzle
+
+# Expose volume for database persistence
+VOLUME ["/app/data"]
 
 EXPOSE 3000
 CMD ["node", ".output/server/index.mjs"]
