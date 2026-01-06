@@ -24,6 +24,10 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOST=0.0.0.0
 
+# Configure generic environment variables
+ENV NUXT_LOG_LEVEL=info
+ENV DB_PATH="/app/data/sqlite.db"
+
 # Copy compiled server output
 COPY --from=build /app/.output ./.output
 # Copy migration files

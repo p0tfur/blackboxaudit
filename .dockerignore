@@ -1,0 +1,10 @@
+node_modules
+.output
+.nuxt
+.git
+.gitignore
+dist
+sqlite.db
+sqlite.db-shm
+sqlite.db-wal
+README.md
