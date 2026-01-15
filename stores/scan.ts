@@ -10,6 +10,7 @@ export type ScanCategory =
   | "forms"
   | "information"
   | "third-party"
+  | "reputation"
   | "other";
 
 export interface ScanResult {
@@ -164,6 +165,7 @@ export const useScanStore = defineStore("scan", {
         forms: 0.4,
         information: 0.3, // Info disclosure is basically noise
         "third-party": 0.4,
+        reputation: 1.2,  // Reputation issues are important
         other: 0.3,
       };
 

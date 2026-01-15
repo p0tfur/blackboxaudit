@@ -779,6 +779,60 @@ export async function scanWebsite(url: string): Promise<SecurityCheckResponse> {
     } catch (e) {
       /* ignore DNS errors */
     }
+
+    // --- Phase 5: Blacklist/Reputation Check ---
+    try {
+      const blacklistRes = await axios.get(`/api/blacklist`, {
+        params: { domain: domain },
+      });
+      
+      if (blacklistRes.data && !blacklistRes.data.error) {
+        const bl = blacklistRes.data;
+        
+        // Report overall reputation
+        if (bl.listedCount > 0) {
+          // Domain is on at least one blacklist
+          const categories = bl.categories;
+          
+          if (categories.malware > 0) {
+            addResult(results, {
+              name: "Malware Blacklist Detection",
+              severity: "high",
+              recommendation: `Domain is listed on ${categories.malware} malware blocklist(s). This indicates potential malware distribution. Investigate and request removal.`,
+              category: "reputation",
+            });
+          }
+          
+          if (categories.phishing > 0) {
+            addResult(results, {
+              name: "Phishing Blacklist Detection",
+              severity: "high",
+              recommendation: `Domain is listed on ${categories.phishing} phishing blocklist(s). This may indicate phishing activity. Investigate and request removal.`,
+              category: "reputation",
+            });
+          }
+          
+          if (categories.spam > 0) {
+            addResult(results, {
+              name: "Spam Blacklist Detection",
+              severity: "medium",
+              recommendation: `Domain is listed on ${categories.spam} spam blocklist(s). This may affect email deliverability. Review sending practices and request removal.`,
+              category: "reputation",
+            });
+          }
+        } else {
+          // Clean reputation
+          addResult(results, {
+            name: "Clean Reputation",
+            severity: "low",
+            recommendation: `Domain has clean reputation. Not found on any of ${bl.totalChecks} blocklists checked (spam, malware, phishing).`,
+            category: "reputation",
+          });
+        }
+      }
+    } catch (e) {
+      /* ignore blacklist check errors */
+    }
   } catch (error: any) {
     console.error("Security Scan Error:", error);
     addResult(results, {
