@@ -58,6 +58,7 @@ export default defineComponent({
         "information",
         "third-party",
         "reputation",
+        "dns",
         "other",
       ];
       const counts: Record<string, number> = {};
@@ -78,7 +79,7 @@ export default defineComponent({
         labels,
         datasets: [
           {
-            backgroundColor: ["#2563eb", "#06b6d4", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#14b8a6", "#475569"],
+            backgroundColor: ["#2563eb", "#06b6d4", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#14b8a6", "#6366f1", "#475569"],
             data,
             borderWidth: 0,
           },

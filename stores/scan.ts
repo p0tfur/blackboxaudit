@@ -11,6 +11,7 @@ export type ScanCategory =
   | "information"
   | "third-party"
   | "reputation"
+  | "dns"
   | "other";
 
 export interface ScanResult {
@@ -166,6 +167,7 @@ export const useScanStore = defineStore("scan", {
         information: 0.3, // Info disclosure is basically noise
         "third-party": 0.4,
         reputation: 1.2,  // Reputation issues are important
+        dns: 0.8,         // DNS issues affect reliability
         other: 0.3,
       };
 

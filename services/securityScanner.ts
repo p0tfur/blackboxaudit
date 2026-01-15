@@ -833,6 +833,94 @@ export async function scanWebsite(url: string): Promise<SecurityCheckResponse> {
     } catch (e) {
       /* ignore blacklist check errors */
     }
+
+    // --- Phase 6: DNS Health Check ---
+    try {
+      const dnsRes = await axios.get(`/api/dns`, {
+        params: { domain: domain },
+      });
+      
+      if (dnsRes.data && !dnsRes.data.error) {
+        const dns = dnsRes.data;
+        
+        // Report A Records status
+        if (dns.aRecords && dns.aRecords.length > 0) {
+          addResult(results, {
+            name: "A Records Configured",
+            severity: "low",
+            recommendation: `Domain resolves to ${dns.aRecords.length} IP address(es): ${dns.aRecords.slice(0, 3).join(", ")}${dns.aRecords.length > 3 ? "..." : ""}`,
+            category: "dns",
+          });
+        } else {
+          addResult(results, {
+            name: "Missing A Records",
+            severity: "high",
+            recommendation: "No A records found - domain may not resolve properly. Configure A records pointing to your server IP.",
+            category: "dns",
+          });
+        }
+        
+        // Report NS Records status
+        if (dns.nsRecords && dns.nsRecords.length >= 2) {
+          addResult(results, {
+            name: "NS Records Configured",
+            severity: "low",
+            recommendation: `Domain has ${dns.nsRecords.length} nameservers configured for redundancy.`,
+            category: "dns",
+          });
+        } else if (dns.nsRecords && dns.nsRecords.length === 1) {
+          addResult(results, {
+            name: "Single Nameserver",
+            severity: "medium",
+            recommendation: "Only 1 nameserver configured. Add redundant NS records for better reliability.",
+            category: "dns",
+          });
+        } else {
+          addResult(results, {
+            name: "Missing NS Records",
+            severity: "high",
+            recommendation: "No NS records found - DNS may not be properly configured.",
+            category: "dns",
+          });
+        }
+        
+        // Report MX Records status (informational)
+        if (dns.mxRecords && dns.mxRecords.length > 0) {
+          addResult(results, {
+            name: "MX Records Configured",
+            severity: "low",
+            recommendation: `Email configured with ${dns.mxRecords.length} mail server(s).`,
+            category: "dns",
+          });
+        } else {
+          addResult(results, {
+            name: "No MX Records",
+            severity: "low",
+            recommendation: "No MX records found - domain cannot receive email. Add MX records if email is needed.",
+            category: "dns",
+          });
+        }
+        
+        // Report DNSSEC status
+        if (dns.dnssecEnabled) {
+          addResult(results, {
+            name: "DNSSEC Enabled",
+            severity: "low",
+            recommendation: "DNSSEC is enabled, protecting against DNS spoofing attacks.",
+            category: "dns",
+          });
+        } else {
+          addResult(results, {
+            name: "DNSSEC Not Enabled",
+            severity: "medium",
+            recommendation: "DNSSEC is not enabled. Consider enabling DNSSEC to protect against DNS spoofing and cache poisoning attacks.",
+            category: "dns",
+          });
+        }
+      }
+    } catch (e) {
+      /* ignore DNS health check errors */
+    }
   } catch (error: any) {
     console.error("Security Scan Error:", error);
     addResult(results, {
