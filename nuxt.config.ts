@@ -23,6 +23,14 @@ export default defineNuxtConfig({
     transpile: ["vue-chartjs", "chart.js"],
   },
   nitro: {
+    // Remove X-Powered-By header
+    routeRules: {
+      '/**': {
+        headers: {
+          'X-Powered-By': ''
+        }
+      }
+    },
     serverAssets: [
       {
         baseName: 'migrations',
