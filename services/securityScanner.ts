@@ -584,6 +584,74 @@ export async function scanWebsite(url: string): Promise<SecurityCheckResponse> {
       }
     }
 
+    // --- Phase 4c: Detailed TLS/SSL Analysis ---
+    try {
+      const tlsRes = await axios.get(`/api/tls`, {
+        params: { url: normalizedUrl },
+      });
+      
+      if (tlsRes.data && !tlsRes.data.error) {
+        const tls = tlsRes.data;
+        
+        // Report TLS version
+        if (tls.issues?.tlsVersion && tls.issues.tlsVersion.length > 0) {
+          const tlsIssue = tls.issues.tlsVersion[0];
+          let severity: "low" | "medium" | "high" = "low";
+          
+          if (tlsIssue.includes("OUTDATED")) {
+            severity = "high";
+          } else if (tlsIssue.includes("consider upgrading")) {
+            severity = "medium";
+          }
+          
+          addResult(results, {
+            name: `TLS Version: ${tls.tlsVersion}`,
+            severity,
+            recommendation: tlsIssue,
+            category: "transport",
+          });
+        }
+        
+        // Report cipher suite
+        if (tls.issues?.cipher && tls.issues.cipher.length > 0) {
+          const cipherIssue = tls.issues.cipher[0];
+          let severity: "low" | "medium" | "high" = "low";
+          
+          if (cipherIssue.includes("Weak cipher")) {
+            severity = "high";
+          } else if (cipherIssue.includes("consider")) {
+            severity = "medium";
+          }
+          
+          addResult(results, {
+            name: `Cipher Suite: ${tls.cipherSuite}`,
+            severity,
+            recommendation: cipherIssue,
+            category: "transport",
+          });
+        }
+        
+        // Report certificate chain
+        if (tls.issues?.chain && tls.issues.chain.length > 0) {
+          const chainIssue = tls.issues.chain[0];
+          let severity: "low" | "medium" | "high" = "low";
+          
+          if (chainIssue.includes("No certificate") || chainIssue.includes("Self-signed")) {
+            severity = "medium";
+          }
+          
+          addResult(results, {
+            name: "Certificate Chain",
+            severity,
+            recommendation: chainIssue,
+            category: "transport",
+          });
+        }
+      }
+    } catch (e) {
+      /* ignore TLS details check errors */
+    }
+
     // --- Phase 2: Shallow Crawler ---
     const baseUrl = new URL(normalizedUrl).origin;
     const visitedUrls = new Set<string>([normalizedUrl]);
