@@ -598,18 +598,25 @@ export async function scanWebsite(url: string): Promise<SecurityCheckResponse> {
           const tlsIssue = tls.issues.tlsVersion[0];
           let severity: "low" | "medium" | "high" = "low";
           
-          if (tlsIssue.includes("OUTDATED")) {
+          // Skip reporting if TLS is excellent (no need to show as finding)
+          if (tlsIssue.includes("excellent")) {
+            // Don't report excellent TLS as an issue
+            // Continue to next check
+          } else if (tlsIssue.includes("OUTDATED")) {
             severity = "high";
           } else if (tlsIssue.includes("consider upgrading")) {
             severity = "medium";
           }
           
-          addResult(results, {
-            name: `TLS Version: ${tls.tlsVersion}`,
-            severity,
-            recommendation: tlsIssue,
-            category: "transport",
-          });
+          // Only add result if it's not "excellent"
+          if (!tlsIssue.includes("excellent")) {
+            addResult(results, {
+              name: `TLS Version: ${tls.tlsVersion}`,
+              severity,
+              recommendation: tlsIssue,
+              category: "transport",
+            });
+          }
         }
         
         // Report cipher suite
@@ -623,12 +630,15 @@ export async function scanWebsite(url: string): Promise<SecurityCheckResponse> {
             severity = "medium";
           }
           
-          addResult(results, {
-            name: `Cipher Suite: ${tls.cipherSuite}`,
-            severity,
-            recommendation: cipherIssue,
-            category: "transport",
-          });
+          // Only report if there's an actual issue (not "Strong cipher")
+          if (!cipherIssue.includes("Strong cipher")) {
+            addResult(results, {
+              name: `Cipher Suite: ${tls.cipherSuite}`,
+              severity,
+              recommendation: cipherIssue,
+              category: "transport",
+            });
+          }
         }
         
         // Report certificate chain
@@ -1007,28 +1017,31 @@ export async function scanWebsite(url: string): Promise<SecurityCheckResponse> {
           const categories = bl.categories;
           
           if (categories.malware > 0) {
+            const malwareLists = bl.results.filter((r: any) => r.category === "malware").map((r: any) => r.name).join(", ");
             addResult(results, {
               name: "Malware Blacklist Detection",
               severity: "high",
-              recommendation: `Domain is listed on ${categories.malware} malware blocklist(s). This indicates potential malware distribution. Investigate and request removal.`,
+              recommendation: `Domain is listed on ${categories.malware} malware blocklist(s): ${malwareLists}. This may be a false positive for new domains. Verify and request removal if needed.`,
               category: "reputation",
             });
           }
           
           if (categories.phishing > 0) {
+            const phishingLists = bl.results.filter((r: any) => r.category === "phishing").map((r: any) => r.name).join(", ");
             addResult(results, {
               name: "Phishing Blacklist Detection",
               severity: "high",
-              recommendation: `Domain is listed on ${categories.phishing} phishing blocklist(s). This may indicate phishing activity. Investigate and request removal.`,
+              recommendation: `Domain is listed on ${categories.phishing} phishing blocklist(s): ${phishingLists}. This may be a false positive. Verify and request removal if needed.`,
               category: "reputation",
             });
           }
           
           if (categories.spam > 0) {
+            const spamLists = bl.results.filter((r: any) => r.category === "spam").map((r: any) => r.name).join(", ");
             addResult(results, {
               name: "Spam Blacklist Detection",
               severity: "medium",
-              recommendation: `Domain is listed on ${categories.spam} spam blocklist(s). This may affect email deliverability. Review sending practices and request removal.`,
+              recommendation: `Domain is listed on ${categories.spam} spam blocklist(s): ${spamLists}. This may affect email deliverability. Review sending practices and request removal if needed.`,
               category: "reputation",
             });
           }

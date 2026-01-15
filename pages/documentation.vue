@@ -41,11 +41,14 @@
                 </ul>
               </div>
               <div class="bg-white rounded-lg border border-slate-200 p-6">
-                <h3 class="text-lg font-semibold text-slate-900 mb-3">SSL/TLS Certificate</h3>
+                <h3 class="text-lg font-semibold text-slate-900 mb-3">SSL/TLS Security</h3>
                 <ul class="space-y-2 text-slate-600">
                   <li>• Certificate expiry date (alerts if &lt; 30 days)</li>
                   <li>• Expired certificate detection</li>
-                  <li>• Issuer/Subject surfaced for review</li>
+                  <li>• TLS version analysis (1.2 vs 1.3)</li>
+                  <li>• Cipher suite strength evaluation</li>
+                  <li>• Certificate chain validation</li>
+                  <li>• Weak encryption detection</li>
                 </ul>
               </div>
               <div class="bg-white rounded-lg border border-slate-200 p-6">
@@ -61,12 +64,35 @@
               <div class="bg-white rounded-lg border border-slate-200 p-6">
                 <h3 class="text-lg font-semibold text-slate-900 mb-3">Active Probing &amp; External Signals</h3>
                 <ul class="space-y-2 text-slate-600">
-                  <li>• Sensitive file probing (e.g. /.env, /.git/config, /web.config)</li>
+                  <li>• 150+ sensitive file checks (admin panels, API docs, backups, configs)</li>
+                  <li>• Admin panel detection (/admin, /wp-admin, /phpmyadmin)</li>
+                  <li>• API documentation exposure (/swagger, /api/docs, /graphql)</li>
+                  <li>• Debug endpoint discovery (/debug, /trace, /actuator)</li>
+                  <li>• Version control exposure (.git, .svn)</li>
                   <li>• Soft 404 detection</li>
                   <li>• robots.txt and security.txt discovery</li>
-                  <li>• Subresource Integrity (SRI) missing on external scripts</li>
-                  <li>• Third-party script domain inventory (supply chain risk signal)</li>
-                  <li>• DNS email security: SPF / DMARC presence (via DNS-over-HTTPS)</li>
+                  <li>• Subresource Integrity (SRI) validation</li>
+                  <li>• Third-party script domain inventory</li>
+                </ul>
+              </div>
+              <div class="bg-white rounded-lg border border-slate-200 p-6">
+                <h3 class="text-lg font-semibold text-slate-900 mb-3">DNS Health Check</h3>
+                <ul class="space-y-2 text-slate-600">
+                  <li>• A Record validation (IP resolution)</li>
+                  <li>• NS Record redundancy check</li>
+                  <li>• MX Record configuration (email setup)</li>
+                  <li>• DNSSEC status verification</li>
+                  <li>• SPF/DMARC email authentication</li>
+                </ul>
+              </div>
+              <div class="bg-white rounded-lg border border-slate-200 p-6">
+                <h3 class="text-lg font-semibold text-slate-900 mb-3">Reputation &amp; Blacklists</h3>
+                <ul class="space-y-2 text-slate-600">
+                  <li>• Spam blacklist detection (Spamhaus, SURBL, SORBS)</li>
+                  <li>• Malware database checks</li>
+                  <li>• Phishing list verification</li>
+                  <li>• Multi-source reputation scoring</li>
+                  <li>• Real-time DNS-based blocklist queries</li>
                 </ul>
               </div>
             </div>
