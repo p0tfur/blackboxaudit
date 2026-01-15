@@ -775,15 +775,159 @@ export async function scanWebsite(url: string): Promise<SecurityCheckResponse> {
 
     // --- Phase 3a: Active Probing (Sensitive Files) ---
     const sensitivePaths = [
+      // Environment and configuration files
       "/.env",
-      "/.git/config",
-      "/.svn/entries",
-      "/.gitignore",
-      "/web.config",
-      "/phpinfo.php",
+      "/.env.local",
+      "/.env.production",
+      "/.env.development",
       "/config.json",
+      "/config.yml",
+      "/config.yaml",
+      "/settings.json",
+      "/appsettings.json",
+      "/web.config",
+      "/app.config",
+      
+      // Version control
+      "/.git/config",
+      "/.git/HEAD",
+      "/.gitignore",
+      "/.svn/entries",
+      "/.hg/",
+      
+      // Database files and backups
       "/backup.sql",
       "/dump.sql",
+      "/database.sql",
+      "/db.sql",
+      "/backup.zip",
+      "/backup.tar.gz",
+      "/site-backup.zip",
+      "/database-backup.sql",
+      
+      // PHP info and debug
+      "/phpinfo.php",
+      "/info.php",
+      "/test.php",
+      "/debug.php",
+      "/trace.php",
+      
+      // Admin panels
+      "/admin",
+      "/admin/",
+      "/administrator",
+      "/administrator/",
+      "/wp-admin",
+      "/wp-admin/",
+      "/phpmyadmin",
+      "/phpmyadmin/",
+      "/pma",
+      "/pma/",
+      "/adminer.php",
+      "/mysql",
+      "/mysql/",
+      "/controlpanel",
+      "/control-panel",
+      "/cpanel",
+      
+      // API documentation
+      "/api/docs",
+      "/api/documentation",
+      "/swagger",
+      "/swagger.json",
+      "/swagger.yaml",
+      "/swagger-ui",
+      "/swagger-ui.html",
+      "/api-docs",
+      "/docs",
+      "/graphql",
+      "/playground",
+      
+      // Debug and trace endpoints
+      "/debug",
+      "/debug/",
+      "/trace",
+      "/trace/",
+      "/error",
+      "/errors",
+      "/logs",
+      "/log",
+      "/console",
+      
+      // Common CMS files
+      "/wp-config.php",
+      "/wp-config.php.bak",
+      "/wp-config-sample.php",
+      "/wp-content/debug.log",
+      "/readme.html",
+      "/license.txt",
+      
+      // Framework specific
+      "/.htaccess",
+      "/.htpasswd",
+      "/composer.json",
+      "/composer.lock",
+      "/package.json",
+      "/package-lock.json",
+      "/yarn.lock",
+      
+      // Server status and info
+      "/server-status",
+      "/server-info",
+      "/status",
+      "/health",
+      "/metrics",
+      "/actuator",
+      "/actuator/health",
+      "/actuator/env",
+      
+      // Common backup patterns
+      "/backup",
+      "/backups",
+      "/old",
+      "/temp",
+      "/tmp",
+      "/cache",
+      
+      // IDE and editor files
+      "/.vscode",
+      "/.idea",
+      "/.DS_Store",
+      
+      // Cloud provider metadata (potential SSRF)
+      "/server-status",
+      
+      // Common test files
+      "/test",
+      "/tests",
+      "/testing",
+      
+      // Build artifacts
+      "/build",
+      "/dist",
+      "/node_modules",
+      
+      // Common filenames
+      "/TODO",
+      "/CHANGELOG",
+      "/VERSION",
+      
+      // Drupal
+      "/CHANGELOG.txt",
+      "/sites/default/settings.php",
+      
+      // Joomla
+      "/configuration.php",
+      "/configuration.php-dist",
+      
+      // Laravel
+      "/.env.example",
+      "/storage/logs/laravel.log",
+      
+      // Common API keys locations
+      "/api/keys",
+      "/api/token",
+      "/api/config",
     ];
 
     await Promise.all(
