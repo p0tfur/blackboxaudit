@@ -54,51 +54,36 @@ export default defineEventHandler(async (event) => {
     // DNSBL lookups work by querying: domain.blocklist.example.com
     await Promise.all(
       domainBlocklists.map(async (bl) => {
+        const lookupDomain = `${cleanDomain}.${bl.host}`;
         try {
           // For domain-based blocklists
-          const lookupDomain = `${cleanDomain}.${bl.host}`;
           const addresses = await resolve4(lookupDomain);
           
-          // If we get a response, the domain is listed
-          // But we need to verify the response code matches a listing indicator
-          // Some DNSBLs return specific codes, others use 127.0.0.x pattern
+          // If we get a response, check if it matches the DNSBL listing pattern
+          // DNSBLs return 127.0.0.x where x > 0 to indicate listing
+          // 127.0.0.0 or no 127.x.x.x response means NOT listed
           const isListed = addresses.some((addr: string) => 
-            addr.startsWith("127.0.0.") && addr !== "127.0.0.0"
+            addr.startsWith("127.0.0.") && parseInt(addr.split(".")[3]) > 0
           );
           
-          if (isListed) {
-            results.push({
-              name: bl.name,
-              category: bl.category,
-              listed: true,
-              response: addresses.join(", "),
-            });
-          } else {
-            results.push({
-              name: bl.name,
-              category: bl.category,
-              listed: false,
-              response: addresses.join(", "),
-            });
-          }
+          console.log(`[Blacklist] ${bl.name} for ${cleanDomain}: response=${addresses.join(",")}, listed=${isListed}`);
+          
+          results.push({
+            name: bl.name,
+            category: bl.category,
+            listed: isListed,
+            response: addresses.join(", "),
+          });
         } catch (err: any) {
-          // NXDOMAIN means not listed (this is expected for clean domains)
-          if (err.code === "ENOTFOUND" || err.code === "ENODATA") {
-            results.push({
-              name: bl.name,
-              category: bl.category,
-              listed: false,
-            });
-          } else if (err.code === "ETIMEOUT" || err.code === "ESERVFAIL") {
-            // Timeout or server failure - skip this list
-            results.push({
-              name: bl.name,
-              category: bl.category,
-              listed: false,
-              response: "timeout",
-            });
-          }
-          // Other errors - silently skip
+          // NXDOMAIN (ENOTFOUND) or NODATA means NOT listed - this is the expected response for clean domains
+          console.log(`[Blacklist] ${bl.name} for ${cleanDomain}: error=${err.code} (NOT listed)`);
+          
+          results.push({
+            name: bl.name,
+            category: bl.category,
+            listed: false,
+            response: err.code === "ETIMEOUT" || err.code === "ESERVFAIL" ? "timeout" : undefined,
+          });
         }
       })
     );
