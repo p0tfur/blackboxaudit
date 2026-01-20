@@ -1,7 +1,13 @@
 import { defineStore } from "pinia";
 import { useScanLimits } from "~/composables/useScanLimits";
 
-export type ScanSeverity = "low" | "medium" | "high";
+// Severity levels:
+// - 'pass' = positive confirmation (e.g., DNSSEC enabled, SSL valid)
+// - 'info' = informational notice (e.g., certificate chain details)
+// - 'low' = minor issue or suggestion
+// - 'medium' = moderate security concern
+// - 'high' = critical security issue
+export type ScanSeverity = "pass" | "info" | "low" | "medium" | "high";
 export type ScanCategory =
   | "transport"
   | "headers"
@@ -151,7 +157,10 @@ export const useScanStore = defineStore("scan", {
 
     calculateScore() {
       // Very lenient severity weights - most issues are minor
+      // 'pass' and 'info' have 0 weight as they're not issues
       const severityWeights: Record<ScanSeverity, number> = {
+        pass: 0,
+        info: 0,
         high: 3,
         medium: 1.5,
         low: 0.5,

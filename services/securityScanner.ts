@@ -114,8 +114,8 @@ const analyzePage = (page: PageData, results: ScanResult[], normalizedUrl: strin
   if (!coop) {
     addResult(results, {
       name: `Missing COOP Header on ${page.url}`,
-      severity: "low",
-      recommendation: "Consider adding Cross-Origin-Opener-Policy to isolate your browsing context.",
+      severity: "info",
+      recommendation: "Consider adding Cross-Origin-Opener-Policy to isolate your browsing context. Note: This header can break third-party integrations (Stripe popups, OAuth flows). Recommended only for high-security applications.",
       category: "headers",
     });
   }
@@ -124,8 +124,8 @@ const analyzePage = (page: PageData, results: ScanResult[], normalizedUrl: strin
   if (!coep) {
     addResult(results, {
       name: `Missing COEP Header on ${page.url}`,
-      severity: "low",
-      recommendation: "Consider adding Cross-Origin-Embedder-Policy for better isolation.",
+      severity: "info",
+      recommendation: "Consider adding Cross-Origin-Embedder-Policy for better isolation. Note: This header requires CORS for all resources and can break external images (Instagram, CDN) and fonts. Recommended only for high-security applications.",
       category: "headers",
     });
   }
@@ -134,9 +134,9 @@ const analyzePage = (page: PageData, results: ScanResult[], normalizedUrl: strin
   if (!corp) {
     addResult(results, {
       name: `Missing CORP Header on ${page.url}`,
-      severity: "low",
+      severity: "info",
       recommendation:
-        "Consider adding Cross-Origin-Resource-Policy to control how resources can be embedded cross-origin.",
+        "Consider adding Cross-Origin-Resource-Policy to control how resources can be embedded cross-origin. Note: This header can block legitimate cross-origin embedding. Recommended only for high-security applications.",
       category: "headers",
     });
   }
@@ -201,8 +201,8 @@ const analyzePage = (page: PageData, results: ScanResult[], normalizedUrl: strin
   if (!cacheControl || !/no-cache|no-store|private/i.test(cacheControl)) {
     addResult(results, {
       name: `Missing Cache-Control restrictions on ${page.url}`,
-      severity: "medium",
-      recommendation: "Add Cache-Control: no-store, no-cache headers for sensitive responses",
+      severity: "low",
+      recommendation: "Add Cache-Control: no-store, no-cache headers for HTML pages with sensitive data. Note: Static assets (CSS, JS, images) should be cached for performance.",
       category: "headers",
     });
   } else if (/public/i.test(cacheControl) || /max-age=\d{4,}/i.test(cacheControl)) {
@@ -577,7 +577,7 @@ export async function scanWebsite(url: string): Promise<SecurityCheckResponse> {
       } else {
         addResult(results, {
           name: "SSL Certificate Valid",
-          severity: "low",
+          severity: "pass",
           recommendation: `Certificate is valid until ${expiryDate.toLocaleDateString()} (Issuer: ${cert.issuer}).`,
           category: "transport",
         });
@@ -644,7 +644,7 @@ export async function scanWebsite(url: string): Promise<SecurityCheckResponse> {
         // Report certificate chain
         if (tls.issues?.chain && tls.issues.chain.length > 0) {
           const chainIssue = tls.issues.chain[0];
-          let severity: "low" | "medium" | "high" = "low";
+          let severity: "info" | "low" | "medium" | "high" = "info";
           
           if (chainIssue.includes("No certificate") || chainIssue.includes("Self-signed")) {
             severity = "medium";
@@ -724,7 +724,7 @@ export async function scanWebsite(url: string): Promise<SecurityCheckResponse> {
       if (robotsRes.data.status === 200 && robotsRes.data.data) {
         addResult(results, {
           name: "Robots.txt Found",
-          severity: "low",
+          severity: "info",
           recommendation: "Review robots.txt for sensitive paths that shouldn't be indexed",
           category: "information",
         });
@@ -741,7 +741,7 @@ export async function scanWebsite(url: string): Promise<SecurityCheckResponse> {
       if (securityRes.data.status === 200 && securityRes.data.data) {
         addResult(results, {
           name: "Security.txt Found",
-          severity: "low",
+          severity: "pass",
           recommendation: "Excellent! The site follows RFC 9116 for security contact information",
           category: "information",
         });
@@ -1021,7 +1021,7 @@ export async function scanWebsite(url: string): Promise<SecurityCheckResponse> {
             addResult(results, {
               name: "Malware Blacklist Detection",
               severity: "high",
-              recommendation: `Domain is listed on ${categories.malware} malware blocklist(s): ${malwareLists}. This may be a false positive for new domains. Verify and request removal if needed.`,
+              recommendation: `Domain is listed on ${categories.malware} malware blocklist(s): ${malwareLists}. This may be a false positive for new domains. Request removal: Spamhaus (https://www.spamhaus.org/lookup/), Google Safe Browsing (https://safebrowsing.google.com/safebrowsing/report_error/).`,
               category: "reputation",
             });
           }
@@ -1031,7 +1031,7 @@ export async function scanWebsite(url: string): Promise<SecurityCheckResponse> {
             addResult(results, {
               name: "Phishing Blacklist Detection",
               severity: "high",
-              recommendation: `Domain is listed on ${categories.phishing} phishing blocklist(s): ${phishingLists}. This may be a false positive. Verify and request removal if needed.`,
+              recommendation: `Domain is listed on ${categories.phishing} phishing blocklist(s): ${phishingLists}. This may be a false positive. Request removal: Google Safe Browsing (https://safebrowsing.google.com/safebrowsing/report_error/).`,
               category: "reputation",
             });
           }
@@ -1041,7 +1041,7 @@ export async function scanWebsite(url: string): Promise<SecurityCheckResponse> {
             addResult(results, {
               name: "Spam Blacklist Detection",
               severity: "medium",
-              recommendation: `Domain is listed on ${categories.spam} spam blocklist(s): ${spamLists}. This may affect email deliverability. Review sending practices and request removal if needed.`,
+              recommendation: `Domain is listed on ${categories.spam} spam blocklist(s): ${spamLists}. This may affect email deliverability. Request removal: URIBL (https://admin.uribl.com/), Spamhaus (https://www.spamhaus.org/lookup/).`,
               category: "reputation",
             });
           }
@@ -1049,7 +1049,7 @@ export async function scanWebsite(url: string): Promise<SecurityCheckResponse> {
           // Clean reputation
           addResult(results, {
             name: "Clean Reputation",
-            severity: "low",
+            severity: "pass",
             recommendation: `Domain has clean reputation. Not found on any of ${bl.totalChecks} blocklists checked (spam, malware, phishing).`,
             category: "reputation",
           });
@@ -1072,7 +1072,7 @@ export async function scanWebsite(url: string): Promise<SecurityCheckResponse> {
         if (dns.aRecords && dns.aRecords.length > 0) {
           addResult(results, {
             name: "A Records Configured",
-            severity: "low",
+            severity: "pass",
             recommendation: `Domain resolves to ${dns.aRecords.length} IP address(es): ${dns.aRecords.slice(0, 3).join(", ")}${dns.aRecords.length > 3 ? "..." : ""}`,
             category: "dns",
           });
@@ -1089,7 +1089,7 @@ export async function scanWebsite(url: string): Promise<SecurityCheckResponse> {
         if (dns.nsRecords && dns.nsRecords.length >= 2) {
           addResult(results, {
             name: "NS Records Configured",
-            severity: "low",
+            severity: "pass",
             recommendation: `Domain has ${dns.nsRecords.length} nameservers configured for redundancy.`,
             category: "dns",
           });
@@ -1113,7 +1113,7 @@ export async function scanWebsite(url: string): Promise<SecurityCheckResponse> {
         if (dns.mxRecords && dns.mxRecords.length > 0) {
           addResult(results, {
             name: "MX Records Configured",
-            severity: "low",
+            severity: "info",
             recommendation: `Email configured with ${dns.mxRecords.length} mail server(s).`,
             category: "dns",
           });
@@ -1130,7 +1130,7 @@ export async function scanWebsite(url: string): Promise<SecurityCheckResponse> {
         if (dns.dnssecEnabled) {
           addResult(results, {
             name: "DNSSEC Enabled",
-            severity: "low",
+            severity: "pass",
             recommendation: "DNSSEC is enabled, protecting against DNS spoofing attacks.",
             category: "dns",
           });

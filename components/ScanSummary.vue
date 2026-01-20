@@ -1,34 +1,53 @@
 <template>
   <div class="space-y-8">
     <!-- Summary Statistics -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <!-- Pass (Positive Confirmations) -->
       <div
-        class="bg-red-50 rounded-xl border border-red-100 p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow"
+        class="bg-green-50 rounded-xl border border-green-100 p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow"
       >
-        <span class="text-sm font-semibold text-red-700 uppercase tracking-wider mb-2">High Severity</span>
-        <span class="text-4xl font-display font-bold text-red-600">{{ highSeverityCount }}</span>
-        <span class="text-xs text-red-500 mt-2 font-medium">Critical Issues</span>
+        <span class="text-sm font-semibold text-green-700 uppercase tracking-wider mb-2">Passed</span>
+        <span class="text-4xl font-display font-bold text-green-600">{{ passCount }}</span>
+        <span class="text-xs text-green-500 mt-2 font-medium">Verified OK</span>
       </div>
+      <!-- Info (Informational) -->
       <div
-        class="bg-amber-50 rounded-xl border border-amber-100 p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow"
+        class="bg-blue-50 rounded-xl border border-blue-100 p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow"
       >
-        <span class="text-sm font-semibold text-amber-700 uppercase tracking-wider mb-2">Medium Severity</span>
-        <span class="text-4xl font-display font-bold text-amber-600">{{ mediumSeverityCount }}</span>
-        <span class="text-xs text-amber-500 mt-2 font-medium">Warnings</span>
+        <span class="text-sm font-semibold text-blue-700 uppercase tracking-wider mb-2">Info</span>
+        <span class="text-4xl font-display font-bold text-blue-600">{{ infoCount }}</span>
+        <span class="text-xs text-blue-500 mt-2 font-medium">Notices</span>
       </div>
+      <!-- Low -->
       <div
         class="bg-emerald-50 rounded-xl border border-emerald-100 p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow"
       >
-        <span class="text-sm font-semibold text-emerald-700 uppercase tracking-wider mb-2">Low Severity</span>
+        <span class="text-sm font-semibold text-emerald-700 uppercase tracking-wider mb-2">Low</span>
         <span class="text-4xl font-display font-bold text-emerald-600">{{ lowSeverityCount }}</span>
-        <span class="text-xs text-emerald-500 mt-2 font-medium">Notices</span>
+        <span class="text-xs text-emerald-500 mt-2 font-medium">Suggestions</span>
+      </div>
+      <!-- Medium -->
+      <div
+        class="bg-amber-50 rounded-xl border border-amber-100 p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow"
+      >
+        <span class="text-sm font-semibold text-amber-700 uppercase tracking-wider mb-2">Medium</span>
+        <span class="text-4xl font-display font-bold text-amber-600">{{ mediumSeverityCount }}</span>
+        <span class="text-xs text-amber-500 mt-2 font-medium">Warnings</span>
+      </div>
+      <!-- High -->
+      <div
+        class="bg-red-50 rounded-xl border border-red-100 p-5 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow"
+      >
+        <span class="text-sm font-semibold text-red-700 uppercase tracking-wider mb-2">High</span>
+        <span class="text-4xl font-display font-bold text-red-600">{{ highSeverityCount }}</span>
+        <span class="text-xs text-red-500 mt-2 font-medium">Critical</span>
       </div>
     </div>
 
     <!-- Filters -->
     <div class="flex flex-wrap gap-2 pb-2">
       <button
-        v-for="severity in ['all', 'high', 'medium', 'low']"
+        v-for="severity in ['all', 'pass', 'info', 'low', 'medium', 'high']"
         :key="severity"
         @click="activeFilter = severity"
         :class="[
@@ -38,7 +57,7 @@
             : 'bg-white text-slate-600 border-slate-200 hover:border-brand-300 hover:text-brand-600 hover:bg-brand-50',
         ]"
       >
-        {{ severity.charAt(0).toUpperCase() + severity.slice(1) }}
+        {{ severity === 'all' ? 'All' : severity.charAt(0).toUpperCase() + severity.slice(1) }}
       </button>
     </div>
 
@@ -53,7 +72,11 @@
             ? 'bg-white border-red-100 shadow-sm'
             : result.severity === 'medium'
             ? 'bg-white border-amber-100 shadow-sm'
-            : 'bg-white border-emerald-100 shadow-sm',
+            : result.severity === 'low'
+            ? 'bg-white border-emerald-100 shadow-sm'
+            : result.severity === 'info'
+            ? 'bg-white border-blue-100 shadow-sm'
+            : 'bg-white border-green-100 shadow-sm',
         ]"
       >
         <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
@@ -68,10 +91,14 @@
                 ? 'bg-red-50 text-red-700 border border-red-100'
                 : result.severity === 'medium'
                 ? 'bg-amber-50 text-amber-700 border border-amber-100'
-                : 'bg-emerald-50 text-emerald-700 border border-emerald-100',
+                : result.severity === 'low'
+                ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                : result.severity === 'info'
+                ? 'bg-blue-50 text-blue-700 border border-blue-100'
+                : 'bg-green-50 text-green-700 border border-green-100',
             ]"
           >
-            {{ result.severity }}
+            {{ result.severity === 'pass' ? '✓ pass' : result.severity }}
           </span>
         </div>
       </div>
@@ -97,6 +124,15 @@ export default defineComponent({
       return results.value.filter((result: ScanResult) => result.severity === activeFilter.value);
     });
 
+    // Count by severity
+    const passCount = computed(
+      () => results.value.filter((result: ScanResult) => result.severity === "pass").length
+    );
+
+    const infoCount = computed(
+      () => results.value.filter((result: ScanResult) => result.severity === "info").length
+    );
+
     const highSeverityCount = computed(
       () => results.value.filter((result: ScanResult) => result.severity === "high").length
     );
@@ -112,6 +148,8 @@ export default defineComponent({
     return {
       activeFilter,
       filteredResults,
+      passCount,
+      infoCount,
       highSeverityCount,
       mediumSeverityCount,
       lowSeverityCount,

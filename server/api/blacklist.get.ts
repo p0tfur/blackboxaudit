@@ -27,19 +27,21 @@ export default defineEventHandler(async (event) => {
 
     // DNS-based blocklists to check
     // Using free, publicly available DNSBLs
-    const blocklists = [
-      // Spam and malware lists
-      { name: "Spamhaus ZEN", host: "zen.spamhaus.org", category: "spam" },
+    // Note: Some lists are IP-based, some are domain-based
+    const domainBlocklists = [
+      // Domain-based lists (query with domain name)
       { name: "Spamhaus DBL", host: "dbl.spamhaus.org", category: "malware" },
       { name: "SURBL", host: "multi.surbl.org", category: "spam" },
       { name: "URIBL", host: "multi.uribl.com", category: "spam" },
-      // Phishing lists
-      { name: "PhishTank", host: "phishtank.phishtank.com", category: "phishing" },
-      // Malware lists
-      { name: "Malware Domain List", host: "malwaredomainlist.com.bl.blocked.nl", category: "malware" },
-      // General threat lists
-      { name: "SORBS", host: "dnsbl.sorbs.net", category: "spam" },
     ];
+
+    // IP-based lists require resolving domain to IP first
+    // Skipping these for domain scans as they require IP lookup
+    // and can cause false positives when querying with domain names
+    // { name: "Spamhaus ZEN", host: "zen.spamhaus.org", category: "spam" },
+    // { name: "SORBS", host: "dnsbl.sorbs.net", category: "spam" },
+    // { name: "PhishTank", host: "phishtank.phishtank.com", category: "phishing" },
+    // { name: "Malware Domain List", host: "malwaredomainlist.com.bl.blocked.nl", category: "malware" },
 
     const results: Array<{
       name: string;
@@ -48,22 +50,37 @@ export default defineEventHandler(async (event) => {
       response?: string;
     }> = [];
 
-    // Check domain against each blocklist
+    // Check domain against domain-based blocklists only
     // DNSBL lookups work by querying: domain.blocklist.example.com
     await Promise.all(
-      blocklists.map(async (bl) => {
+      domainBlocklists.map(async (bl) => {
         try {
           // For domain-based blocklists
           const lookupDomain = `${cleanDomain}.${bl.host}`;
           const addresses = await resolve4(lookupDomain);
           
           // If we get a response, the domain is listed
-          results.push({
-            name: bl.name,
-            category: bl.category,
-            listed: true,
-            response: addresses.join(", "),
-          });
+          // But we need to verify the response code matches a listing indicator
+          // Some DNSBLs return specific codes, others use 127.0.0.x pattern
+          const isListed = addresses.some((addr: string) => 
+            addr.startsWith("127.0.0.") && addr !== "127.0.0.0"
+          );
+          
+          if (isListed) {
+            results.push({
+              name: bl.name,
+              category: bl.category,
+              listed: true,
+              response: addresses.join(", "),
+            });
+          } else {
+            results.push({
+              name: bl.name,
+              category: bl.category,
+              listed: false,
+              response: addresses.join(", "),
+            });
+          }
         } catch (err: any) {
           // NXDOMAIN means not listed (this is expected for clean domains)
           if (err.code === "ENOTFOUND" || err.code === "ENODATA") {
