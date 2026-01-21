@@ -143,6 +143,8 @@ export default defineEventHandler(async (event) => {
         <text x="60" y="19" font-family="sans-serif" font-size="12" fill="white" text-anchor="middle" font-weight="bold">UNVERIFIED</text>
       </svg>`.trim();
     setHeader(event, 'Content-Type', 'image/svg+xml');
+    // Allow cross-origin embedding for badges (overrides global same-origin policy)
+    setHeader(event, 'Cross-Origin-Resource-Policy', 'cross-origin');
     return svg;
   }
 
@@ -164,6 +166,8 @@ export default defineEventHandler(async (event) => {
 
   setHeader(event, 'Content-Type', 'image/svg+xml');
   setHeader(event, 'Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
+  // Allow cross-origin embedding for badges (overrides global same-origin policy)
+  setHeader(event, 'Cross-Origin-Resource-Policy', 'cross-origin');
   
   return svg;
 });
