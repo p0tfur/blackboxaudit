@@ -59,12 +59,21 @@ export default defineEventHandler(async (event) => {
           // For domain-based blocklists
           const addresses = await resolve4(lookupDomain);
           
-          // If we get a response, check if it matches the DNSBL listing pattern
-          // DNSBLs return 127.0.0.x where x > 0 to indicate listing
-          // 127.0.0.0 or no 127.x.x.x response means NOT listed
-          const isListed = addresses.some((addr: string) => 
-            addr.startsWith("127.0.0.") && parseInt(addr.split(".")[3]) > 0
-          );
+          // DNSBL response code interpretation:
+          // - 127.0.0.1 = Query REFUSED/BLOCKED (rate limit, not a listing!) - IGNORE THIS
+          // - 127.0.0.2+ = Actual listing on various lists
+          // For URIBL specifically:
+          //   127.0.0.1 = query refused (too many queries from DNS server)
+          //   127.0.0.2 = black.uribl.com (spam)
+          //   127.0.0.4 = grey.uribl.com (UBE/UCE)
+          //   127.0.0.8 = red.uribl.com (new/suspicious domains)
+          const isListed = addresses.some((addr: string) => {
+            if (!addr.startsWith("127.0.0.")) return false;
+            const lastOctet = parseInt(addr.split(".")[3]);
+            // 127.0.0.1 means query refused, NOT listed - common with public DNS
+            // Only 127.0.0.2 and above indicate actual listing
+            return lastOctet >= 2;
+          });
           
           console.log(`[Blacklist] ${bl.name} for ${cleanDomain}: response=${addresses.join(",")}, listed=${isListed}`);
           
